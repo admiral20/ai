@@ -41,7 +41,6 @@
   <Switch v-model:checked="loading" />
 
   <hr/>
-
   <Bubble
     content="Hello, welcome to use Ant Design X! Just ask if you have any questions."
     :avatar="{ icon: h(UserOutlined) }"
@@ -134,7 +133,7 @@
     />
   </div>
 
-  <hr />
+  <hr/>
 
   <Flex vertical gap="middle">
     <Bubble
@@ -164,7 +163,9 @@
       "
     />
   </Flex>
-  <hr>
+
+  <hr />
+
   <Flex gap="middle" vertical>
     <Bubble content="shape: default" />
     <Bubble v-bind="sharedLongTextProps" />
@@ -173,7 +174,7 @@
     <Bubble content="shape: corner" shape="corner" />
     <Bubble v-bind="sharedLongTextProps" shape="corner" />
   </Flex>
-  <hr>
+  <hr />
 
   <Flex vertical gap="small">
     <Flex gap="large" align="center">

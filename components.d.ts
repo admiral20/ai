@@ -9,5 +9,9 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AXBubble: typeof import('ant-design-x-vue')['Bubble']
+    Bubble: typeof import('./src/components/Bubble.vue')['default']
+    Conversations: typeof import('./src/components/Conversations.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
   }
 }
