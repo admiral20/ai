@@ -4,6 +4,7 @@
         :items="items"
         default-active-key="item1"
         :style="style"
+        :groupable="groupable"
     />
 
     <contextHolder />
@@ -40,8 +41,8 @@
     </Flex>
 </template>
 <script setup lang="ts">
-import { theme, message } from 'ant-design-vue';
-import { DeleteOutlined, EditOutlined, StopOutlined, PlusSquareOutlined } from '@ant-design/icons-vue';
+import { theme, message, Space } from 'ant-design-vue';
+import { DeleteOutlined, EditOutlined, StopOutlined, PlusSquareOutlined, CommentOutlined } from '@ant-design/icons-vue';
 import { Conversations, type ConversationsProps } from "ant-design-x-vue"
 import { computed, h, ref } from 'vue';
 
@@ -50,6 +51,7 @@ const items: ConversationsProps['items'] = Array.from({ length: 4 }).map((_, ind
   key: `item${index + 1}`,
   label: `Conversation Item ${index + 1}`,
   disabled: index === 3,
+  group: index < 3 ? 'today' : 'yesterday',
 }));
 
 const { token } = theme.useToken();
@@ -122,4 +124,18 @@ const menuConfig1: ConversationsProps['menu'] = (conversation) => ({
 
 const activeKey = ref('item1');
 const updateActiveKey = (v: string) => activeKey.value = v;
+
+const groupable: ConversationsProps['groupable'] = {
+  sort(a, b) {
+    if (a === b) return 0;
+
+    return a === 'Today' ? -1 : 1;
+  },
+  title: (group, { components: { GroupTitle } }) =>
+    group ? h(
+      GroupTitle,
+      null,
+      () => [h(Space, null, () => [h(CommentOutlined), h('span', null, group)])]
+    ) : h(GroupTitle),
+};
 </script>
