@@ -1,4 +1,5 @@
 <template>
+  <h1>Bubble</h1>
   <Flex
     gap="middle"
     vertical
