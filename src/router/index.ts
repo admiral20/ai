@@ -28,6 +28,14 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
+        path: '/welcome',
+        name: 'Welcome',
+        component: () => import('../components/Welcome.vue'),
+        meta: {
+            title: '欢迎'
+        }
+    },
+    {
         path: '/about',
         name: 'About',
         component: () => import('../views/About.vue'),

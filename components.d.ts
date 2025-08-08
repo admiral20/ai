@@ -13,5 +13,6 @@ declare module 'vue' {
     Conversations: typeof import('./src/components/Conversations.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Welcome: typeof import('./src/components/Welcome.vue')['default']
   }
 }

@@ -1,26 +1,33 @@
 <template>
-  <div id="app">
-    <header class="app-header">
-      <nav class="nav">
-        <router-link to="/" class="logo">
-          Vue App
-        </router-link>
-        <div class="nav-links">
-          <router-link to="/" class="nav-item">首页</router-link>
-          <router-link to="/bubble" class="nav-item">对话气泡</router-link>
-          <router-link to="/conversations" class="nav-item">管理对话</router-link>
-          <router-link to="/about" class="nav-item">关于</router-link>
-        </div>
-      </nav>
-    </header>
-    <main class="app-main">
-      <router-view />
-    </main>
-    <footer class="app-footer">
-      <p>&copy; 2025 Vue应用. All rights reserved.</p>
-    </footer>
-  </div>
+  <ConfigProvider :theme="{ algorithm: theme.defaultAlgorithm }">
+    <div id="app">
+      <header class="app-header">
+        <nav class="nav">
+          <router-link to="/" class="logo">
+            Vue App
+          </router-link>
+          <div class="nav-links">
+            <router-link to="/" class="nav-item">首页</router-link>
+            <router-link to="/bubble" class="nav-item">对话气泡</router-link>
+            <router-link to="/conversations" class="nav-item">管理对话</router-link>
+            <router-link to="/welcome" class="nav-item">欢迎</router-link>
+            <router-link to="/about" class="nav-item">关于</router-link>
+          </div>
+        </nav>
+      </header>
+      <main class="app-main">
+        <router-view />
+      </main>
+      <footer class="app-footer">
+        <p>&copy; 2025 Vue应用. All rights reserved.</p>
+      </footer>
+    </div>
+  </ConfigProvider>
 </template>
+<script setup lang="ts">
+import { ConfigProvider, theme } from 'ant-design-vue';
+</script>
+
 <style>
 #app {
   margin: 0;
