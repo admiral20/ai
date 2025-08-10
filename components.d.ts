@@ -8,11 +8,15 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Attachments: typeof import('./src/components/Attachments.vue')['default']
     AXBubble: typeof import('ant-design-x-vue')['Bubble']
     Bubble: typeof import('./src/components/Bubble.vue')['default']
     Conversations: typeof import('./src/components/Conversations.vue')['default']
+    Prompts: typeof import('./src/components/Prompts.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Sender: typeof import('./src/components/Sender.vue')['default']
+    ThoughtChain: typeof import('./src/components/ThoughtChain.vue')['default']
     Welcome: typeof import('./src/components/Welcome.vue')['default']
   }
 }

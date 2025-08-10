@@ -36,6 +36,38 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
+        path: '/prompts',
+        name: 'Prompts',
+        component: () => import('../components/Prompts.vue'),
+        meta: {
+            title: '提示词'
+        }
+    },
+    {
+        path: '/sender',
+        name: 'Sender',
+        component: () => import('../components/Sender.vue'),
+        meta: {
+            title: '消息发送'
+        }
+    },
+    {
+        path: '/attachments',
+        name: 'Attachments',
+        component: () => import('../components/Attachments.vue'),
+        meta: {
+            title: '附件管理'
+        }
+    },
+    {
+        path: '/thought-chain',
+        name: 'ThoughtChain',
+        component: () => import('../components/ThoughtChain.vue'),
+        meta: {
+            title: '思维链'
+        }
+    },
+    {
         path: '/about',
         name: 'About',
         component: () => import('../views/About.vue'),
