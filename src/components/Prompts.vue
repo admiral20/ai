@@ -1,93 +1,205 @@
 <template>
-  <div class="prompts-demo">
-    <h1>Prompts 提示词组件示例</h1>
-    
-    <div class="demo-section">
-      <h2>基础用法</h2>
-      <x-prompts
-        :items="basicPrompts"
-        @item-click="handlePromptClick"
-      />
-    </div>
+  <h1>Prompts 提示词组件示例</h1>
+  <p>用于显示一组与当前上下文相关的预定义的问题或建议。</p>
+  <context-holder />
+  <Prompts
+    wrap
+    title="✨ Inspirational Sparks and Marvelous Tips"
+    :items="items"
+    :on-item-click="(info) => {
+      message.success(`You clicked a prompt: ${info.data.label}`);
+    }"
+  />
+  <hr/>
+  <Prompts title="🤔 You might also want to ask:" :items="items1" vertical />
+  <hr/>
+  <span>响应式宽度</span>
+  <Prompts
+    title="✨ Inspirational Sparks and Marvelous Tips666"
+    :items="items"
+    wrap
+    :styles="{
+      item: {
+        flex: 'none',
+        width: 'calc(30% - 6px)',
+      },
+    }"
+  />
 
-    <div class="demo-section">
-      <h2>带图标的提示词</h2>
-      <x-prompts
-        :items="iconPrompts"
-        @item-click="handlePromptClick"
+  <span>嵌套组合</span>
+  <ConfigProvider
+    :theme="{
+      algorithm: theme.defaultAlgorithm,
+    }"
+  >
+    <Card :style="{ borderRadius: 0, border: 0 }">
+      <Prompts
+        title="Do you want?"
+        :items="items2"
+        wrap
+        :styles="{
+          item: {
+            flex: 'none',
+            width: 'calc(30% - 6px)',
+            backgroundImage: `linear-gradient(137deg, #e5f4ff 0%, #efe7ff 100%)`,
+            border: 0,
+          },
+          subItem: {
+            background: 'rgba(255,255,255,0.45)',
+            border: '1px solid #FFF',
+          },
+        }"
+        @item-click="(info) => {
+          message.success(`You clicked: ${info.data.description}`);
+        }"
       />
-    </div>
+    </Card>
+  </ConfigProvider>
 
-    <div class="demo-section">
-      <h2>自定义样式</h2>
-      <x-prompts
-        :items="customPrompts"
-        :wrap="true"
-        @item-click="handlePromptClick"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>点击结果</h2>
-      <div v-if="selectedPrompt" class="result">
-        <strong>选中的提示词：</strong> {{ selectedPrompt }}
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import {
+  BulbOutlined,
+  InfoCircleOutlined,
+  RocketOutlined,
+  SmileOutlined,
+  WarningOutlined,
+  CoffeeOutlined,
+  FireOutlined,
+  CommentOutlined,
+  HeartOutlined,
+  ReadOutlined 
+} from '@ant-design/icons-vue';
 
-const selectedPrompt = ref<string>('')
+import { App, Card, ConfigProvider, theme, message as messageAnt, Space,  } from 'ant-design-vue';
+import { Prompts, type PromptsProps } from 'ant-design-x-vue';
+import { h } from 'vue';
+const [message, contextHolder] = messageAnt.useMessage();
 
-const basicPrompts = [
-  { key: '1', label: '帮我写一个Vue组件' },
-  { key: '2', label: '解释一下JavaScript闭包' },
-  { key: '3', label: '如何优化网站性能？' },
-  { key: '4', label: '推荐一些前端学习资源' }
-]
-
-const iconPrompts = [
-  { 
-    key: '1', 
-    label: '代码审查', 
-    icon: '🔍',
-    description: '帮助审查和优化代码质量'
+const items: PromptsProps['items'] = [
+  {
+    key: '1',
+    disabled: true,
+    icon: h(BulbOutlined, { style: { color: '#FFD700' } }),
+    label: 'Ignite Your Creativity',
+    description: 'Got any sparks for a new project?',
   },
-  { 
-    key: '2', 
-    label: '文档生成', 
-    icon: '📝',
-    description: '自动生成项目文档'
+  {
+    key: '2',
+    icon: h(InfoCircleOutlined, { style: { color: '#1890FF' } }),
+    label: 'Uncover Background Info',
+    description: 'Help me understand the background of this topic.',
   },
-  { 
-    key: '3', 
-    label: '测试用例', 
-    icon: '🧪',
-    description: '生成单元测试代码'
+  {
+    key: '3',
+    icon: h(RocketOutlined, { style: { color: '#722ED1' } }),
+    label: 'Efficiency Boost Battle',
+    description: 'How can I work faster and better?',
   },
-  { 
-    key: '4', 
-    label: '性能分析', 
-    icon: '⚡',
-    description: '分析应用性能瓶颈'
-  }
-]
+  {
+    key: '4',
+    icon: h(SmileOutlined, { style: { color: '#52C41A' } }),
+    label: 'Tell me a Joke',
+    description: 'Why do not ants get sick? Because they have tiny ant-bodies!',
+  },
+  {
+    key: '5',
+    icon: h(WarningOutlined, { style: { color: '#FF4D4F' } }),
+    label: 'Common Issue Solutions',
+    description: 'How to solve common issues? Share some tips!',
+  },
+];
 
-const customPrompts = [
-  { key: '1', label: 'React vs Vue 对比分析' },
-  { key: '2', label: 'TypeScript 最佳实践' },
-  { key: '3', label: '微前端架构设计' },
-  { key: '4', label: 'GraphQL 入门指南' },
-  { key: '5', label: 'Docker 容器化部署' },
-  { key: '6', label: 'CI/CD 流水线搭建' }
-]
+const items1: PromptsProps['items'] = [
+  {
+    key: '6',
+    icon: h(CoffeeOutlined, { style: { color: '#964B00' } }),
+    description: 'How to rest effectively after long hours of work?How to rest effectively after long hours of work?How to rest effectively after long hours of work?How to rest effectively after long hours of work?How to rest effectively after long hours of work?How to rest effectively after long hours of work?',
+    disabled: false,
+  },
+  {
+    key: '7',
+    icon: h(SmileOutlined, { style: { color: '#FAAD14' } }),
+    description: 'What are the secrets to maintaining a positive mindset?',
+    disabled: false,
+  },
+  {
+    key: '8',
+    icon: h(FireOutlined, { style: { color: '#FF4D4F' } }),
+    description: 'How to stay calm under immense pressure?',
+    disabled: false,
+  },
+];
 
-const handlePromptClick = (item: any) => {
-  selectedPrompt.value = item.label
-  console.log('点击了提示词:', item)
-}
+
+const renderTitle = (icon: any, title: string) => {
+  return h(Space, { align: 'start' }, () => [
+    icon,
+    h('span', null, title)
+  ]);
+};
+
+const items2: PromptsProps['items'] = [
+  {
+    key: '1',
+    label: renderTitle(h(FireOutlined, { style: { color: '#FF4D4F' } }), 'Hot Topics'),
+    description: 'What are you interested in?',
+    children: [
+      {
+        key: '1-1',
+        description: `What's new in X?`,
+      },
+      {
+        key: '1-2',
+        description: `What's AGI?`,
+      },
+      {
+        key: '1-3',
+        description: `Where is the doc?`,
+      },
+    ],
+  },
+  {
+    key: '2',
+    label: renderTitle(h(ReadOutlined, { style: { color: '#1890FF' } }), 'Design Guide'),
+    description: 'How to design a good product?',
+    children: [
+      {
+        key: '2-1',
+        icon: h(HeartOutlined),
+        description: `Know the well`,
+      },
+      {
+        key: '2-2',
+        icon: h(SmileOutlined),
+        description: `Set the AI role`,
+      },
+      {
+        key: '2-3',
+        icon: h(CommentOutlined),
+        description: `Express the feeling`,
+      },
+    ],
+  },
+  {
+    key: '3',
+    label: renderTitle(h(RocketOutlined, { style: { color: '#722ED1' } }), 'Start Creating'),
+    description: 'How to start a new project?',
+    children: [
+      {
+        key: '3-1',
+        label: 'Fast Start',
+        description: `Install Ant Design X`,
+      },
+      {
+        key: '3-2',
+        label: 'Online Playground',
+        description: `Play on the web without installing`,
+      },
+    ],
+  },
+];
 </script>
 
 <style scoped>
