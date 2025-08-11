@@ -188,14 +188,178 @@
     <span>自定义底部内容 - TSX 语法</span>
     <SenderTsx />
 
+    <hr />
+    <span>调整样式</span>
+    <contextHolder />
+    <Flex
+      vertical
+      gap="middle"
+    >
+      <Sender
+        v-model:value="value"
+        :loading="loading"
+        placeholder="Change button border radius"
+        @submit="(msg) => {
+          messageApi.success(`Send: ${msg}`);
+          value = ''
+          loading = true
+        }"
+        @cancel="() => {
+          loading = false
+        }"
+      >
+        <template #actions="{ info: { components: { SendButton, LoadingButton } } }">
+          <Tooltip
+            v-if="loading"
+            title="Click to cancel"
+          >
+            <component :is="LoadingButton" />
+          </Tooltip>
+          <Tooltip
+            v-else
+            :title="value ? 'Send \u21B5' : 'Please type something'"
+          >
+            <component
+              :is="SendButton"
+              shape="default"
+              :style="{ borderRadius: '12px' }"
+            />
+          </Tooltip>
+        </template>
+      </Sender>
+      <Sender
+        v-model:value="value"
+        :loading="loading"
+        placeholder="Change button icon"
+        @submit="(msg) => {
+          messageApi.success(`Send: ${msg}`);
+          value = ''
+          loading = true
+        }"
+        @cancel="() => {
+          loading = false
+        }"
+      >
+        <template #actions="{ info: { components: { SendButton, LoadingButton } } }">
+          <Tooltip
+            v-if="loading"
+            title="Click to cancel"
+          >
+            <component :is="LoadingButton" />
+          </Tooltip>
+          <Tooltip
+            v-else
+            :title="value ? 'Send \u21B5' : 'Please type something'"
+          >
+            <component
+              :is="SendButton"
+              type="text"
+              shape="default"
+              :icon="h(SendOutlined)"
+              :style="{ color: token.colorPrimary }"
+            />
+          </Tooltip>
+        </template>
+      </Sender>
+      <Sender
+        v-model:value="value"
+        :loading="loading"
+        placeholder="Loading not change button"
+        @submit="(msg) => {
+          messageApi.success(`Send: ${msg}`);
+          value = ''
+          loading = true
+        }"
+        @cancel="() => {
+          loading = false
+        }"
+      >
+        <template #actions="{ info: { components: { SendButton } } }">
+          <component :is="SendButton" />
+        </template>
+      </Sender>
+    </Flex>
+
+    <hr />
+    <span>黏贴文件</span>
+    <Flex
+      :style="{ height: '220px' }"
+      align="end"
+    >
+      <Sender
+        ref="senderRef"
+        :value="text"
+        :on-change="v => text = v"
+        :on-submit="submit"
+        :on-paste-file="pastFile"
+      >
+        <template #prefix>
+          <Button
+            type="text"
+            :icon="h(LinkOutlined)"
+            @click="() => {
+              open = !open;
+            }"
+          />
+        </template>
+        <template #header>
+          <Sender.Header
+            title="Attachments"
+            :styles="{
+              content: {
+                padding: 0,
+              },
+            }"
+            :open="open"
+            :on-open-change="v => open = v"
+            force-render
+          >
+            <Attachments
+              ref="attachmentsRef"
+              :before-upload="() => false"
+              :items="items"
+              :on-change="fileChange"
+              :placeholder="placeholder"
+              :get-drop-container="getDropContainer"
+            />
+          </Sender.Header>
+        </template>
+      </Sender>
+    </Flex>
+    <hr />
+    <span>聚焦</span>
+    <Flex
+      wrap="wrap"
+      :gap="12"
+    >
+      <Button @click="focusStart">
+        Focus at first
+      </Button>
+      <Button @click="focusEnd">
+        Focus at last
+      </Button>
+      <Button @click="focusAll">
+        Focus to select all
+      </Button>
+      <Button @click="focusPreventScroll">
+        Focus prevent scroll
+      </Button>
+      <Button @click="blur">
+        Blur
+      </Button>
+      <Sender
+        ref="senderRef1"
+        default-value="Hello, welcome to use Ant Design X!"
+      />
+    </Flex>
   </div>
 </template>
 
 <script setup lang="ts">
-import { message, Switch, Flex, Space, Spin, Typography, Button, Divider, theme } from 'ant-design-vue';
-import { Sender, type SenderProps } from 'ant-design-x-vue';
+import { message, Switch, Flex, Space, Spin, Typography, Button, theme } from 'ant-design-vue';
+import { Sender, Attachments, AttachmentsProps, type SenderProps } from 'ant-design-x-vue';
 import { onWatcherCleanup, ref, watch, h, computed } from 'vue';
-import { ApiOutlined, SearchOutlined, SoundOutlined, EllipsisOutlined, CloudUploadOutlined, LinkOutlined, EnterOutlined } from '@ant-design/icons-vue';
+import { SoundOutlined, EllipsisOutlined, CloudUploadOutlined, LinkOutlined, EnterOutlined, SendOutlined } from '@ant-design/icons-vue';
 import SenderTsx from './SenderTsx.vue';
 
 const [messageApi, contextHolder] = message.useMessage();
@@ -319,52 +483,68 @@ watch(templateLoading, () => {
   }
 });
 
-// defineRender(() => {
-//   return (
-//     <Sender
-//       value={value.value}
-//       onChange={(v) => {
-//         value.value = v;
-//       }}
-//       // autoSize={{ minRows: 2, maxRows: 6 }}
-//       placeholder="Press Enter to send message"
-//       footer={({ components }) => {
-//         const { SendButton, LoadingButton, SpeechButton } = components;
-//         return (
-//           <Flex justify="space-between" align="center">
-//             <Flex gap="small" align="center">
-//               <Button style={iconStyle} type="text" icon={<LinkOutlined />} />
-//               <Divider type="vertical" />
-//               Deep Thinking
-//               <Switch size="small" />
-//               <Divider type="vertical" />
-//               <Button icon={<SearchOutlined />}>Global Search</Button>
-//             </Flex>
-//             <Flex align="center">
-//               <Button type="text" style={iconStyle} icon={<ApiOutlined />} />
-//               <Divider type="vertical" />
-//               <SpeechButton style={iconStyle} />
-//               <Divider type="vertical" />
-//               {loading.value ? (
-//                 <LoadingButton type="default" />
-//               ) : (
-//                 <SendButton type="primary" disabled={false} />
-//               )}
-//             </Flex>
-//           </Flex>
-//         );
-//       }}
-//       onSubmit={() => {
-//         loading.value = true;
-//       }}
-//       onCancel={() => {
-//         loading.value = false;
-//       }}
-//       actions={false}
-//     />
-//   );
-// })
 
+type GetFunction<T> = T extends (...args: any[]) => any ? T : never;
+type PlaceholderType = Parameters<GetFunction<AttachmentsProps['placeholder']>>[0];
+type PastFile = SenderProps['onPasteFile'];
+type FileChange = AttachmentsProps['onChange'];
+
+const open1 = ref(false);
+const items = ref([]);
+const text = ref('');
+
+const attachmentsRef = ref<InstanceType<typeof Attachments>>(null);
+const senderRef = ref<InstanceType<typeof Sender>>(null);
+
+const placeholder = (type: PlaceholderType) =>
+  type === 'drop'
+    ? {
+      title: 'Drop file here',
+    }
+    : {
+      icon: h(CloudUploadOutlined),
+      title: 'Upload files',
+      description: 'Click or drag files to this area to upload',
+    }
+
+const getDropContainer = () => senderRef.value?.nativeElement;
+
+const pastFile: PastFile = (_, files) => {
+  console.log("past")
+  attachmentsRef.value?.upload(files);
+  open.value = true;
+}
+
+const submit1 = () => {
+  items.value = [];
+  text.value = '';
+}
+
+const fileChange: FileChange = ({ fileList }) => items.value = fileList
+
+
+
+const senderRef1 = ref<InstanceType<typeof Sender> | null>(null);
+
+const focusStart = () => {
+  senderRef1.value?.focus({ cursor: 'start' });
+};
+
+const focusEnd = () => {
+  senderRef1.value?.focus({ cursor: 'end' });
+};
+
+const focusAll = () => {
+  senderRef1.value?.focus({ cursor: 'all' });
+};
+
+const focusPreventScroll = () => {
+  senderRef1.value?.focus({ preventScroll: true });
+};
+
+const blur = () => {
+  senderRef1.value?.blur();
+};
 </script>
 
 <style scoped>
