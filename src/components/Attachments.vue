@@ -1,248 +1,294 @@
 <template>
   <div class="attachments-demo">
-    <h1>Attachments 附件组件示例</h1>
-    
+    <h1>Attachments 附件组件</h1>
+    <p>用于需要展示一组附件信息集合的场景</p>
     <div class="demo-section">
-      <h2>基础附件列表</h2>
-      <x-attachments
-        :items="basicAttachments"
-        @remove="handleRemove"
-        @download="handleDownload"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>图片附件预览</h2>
-      <x-attachments
-        :items="imageAttachments"
-        @remove="handleRemove"
-        @preview="handlePreview"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>文档附件</h2>
-      <x-attachments
-        :items="documentAttachments"
-        @remove="handleRemove"
-        @download="handleDownload"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>上传新附件</h2>
-      <a-upload
-        :file-list="fileList"
-        :before-upload="beforeUpload"
-        @remove="handleFileRemove"
-        multiple
-      >
-        <a-button>
-          <upload-outlined />
-          选择文件
-        </a-button>
-      </a-upload>
-      
-      <div v-if="uploadedAttachments.length > 0" style="margin-top: 16px;">
-        <h3>已上传的附件：</h3>
-        <x-attachments
-          :items="uploadedAttachments"
-          @remove="handleUploadedRemove"
-        />
-      </div>
-    </div>
-
-    <div class="demo-section">
-      <h2>操作日志</h2>
-      <div class="action-log">
-        <div 
-          v-for="(log, index) in actionLogs" 
-          :key="index"
-          class="log-item"
+      <contextHolder />
+      <div ref="divRef">
+        <Flex
+          vertical
+          gap="middle"
+          align="flex-start"
         >
-          <span class="log-time">{{ log.time }}</span>
-          <span class="log-action">{{ log.action }}</span>
-          <span class="log-file">{{ log.fileName }}</span>
+          <Sender
+            :prefix="attachmentsNode"
+          />
+          <Switch
+            v-model:checked="fullScreenDrop"
+            checked-children="Full screen drop"
+            un-checked-children="Full screen drop"
+          />
+
+          <Switch
+            v-model:checked="customContent"
+            checked-children="use default content"
+            un-checked-children="custom content"
+          />
+        </Flex>
+      </div>  
+    </div>
+    <div class="demo-section">
+      <p>占位信息</p>
+      <Flex
+        vertical
+        gap="middle"
+        :style="{
+          padding: token.padding,
+          background: token.colorBgContainerDisabled,
+        }"
+      >
+        <div :style="sharedBorderStyle">
+          <Attachments
+            v-bind="sharedAttachmentProps"
+          >
+            <template #placeholder="{ type }">
+              <Flex
+                v-if="type === 'inline'"
+                align="center"
+                justify="center"
+                vertical
+                gap="2"
+              >
+                <Typography.Text style="font-size: 30px; line-height: 1;">
+                  <CloudUploadOutlined />
+                </Typography.Text>
+                <Typography.Title
+                  :level="5"
+                  style="margin: 0; font-size: 14px; line-height: 1.5;"
+                >
+                  Click or Drop files here
+                </Typography.Title>
+                <Typography.Text type="secondary">
+                  Support file type: image, video, audio, document, etc.
+                </Typography.Text>
+              </Flex>
+              <Typography.Text v-if="type === 'drop'">
+                Drop file here
+              </Typography.Text>
+            </template>
+          </Attachments>
         </div>
-        <div v-if="actionLogs.length === 0" class="empty-log">
-          暂无操作记录
+
+        <div :style="sharedBorderStyle">
+          <Attachments
+            v-bind="sharedAttachmentProps"
+          >
+            <template #placeholder="{ type }">
+              <Result
+                v-if="type === 'inline'"
+                title="Custom Placeholder Node"
+                :style="{ padding: 0 }"
+              >
+                <template #icon>
+                  <CloudUploadOutlined />
+                </template>
+                <template #extra>
+                  <Button type="primary">
+                    Do Upload
+                  </Button>
+                </template>
+              </Result>
+              <Typography.Text v-if="type === 'drop'">
+                Drop file here
+              </Typography.Text>
+            </template>
+          </Attachments>
         </div>
-      </div>
+
+        <Flex gap="middle">
+          <Button
+            :style="{ flex: '1 1 50%' }"
+            :disabled="!!items.length"
+            type="primary"
+            @click="fillFiles"
+          >
+            Fill Files
+          </Button>
+          <Button
+            :style="{ flex: '1 1 50%' }"
+            :disabled="!items.length"
+            @click="resetFiles"
+          >
+            Reset Files
+          </Button>
+        </Flex>
+      </Flex>
+    </div>
+
+    <div class="demo-section">
+      <p>超出样式</p>
+      <Flex
+        vertical
+        :gap="'middle'"
+      >
+        <Flex
+          :gap="'middle'"
+          :align="'center'"
+        >
+          <Segmented
+            v-model:value="overflow"
+            :options="[
+              { value: 'wrap', label: 'Wrap' },
+              { value: 'scrollX', label: 'Scroll X' },
+              { value: 'scrollY', label: 'Scroll Y' },
+            ]"
+            style="margin-inline-end: auto"
+          />
+          <Switch
+            v-model:checked="hasItems"
+            checked-children="Data"
+            un-checked-children="Data"
+          />
+          <Switch
+            v-model:checked="disabled"
+            checked-children="Disabled"
+            un-checked-children="Disabled"
+          />
+        </Flex>
+        <Attachments
+          :overflow="overflow"
+          :items="items"
+          :before-upload="() => false"
+          :placeholder="{
+            icon: h(CloudUploadOutlined),
+            title: 'Click or Drop files here',
+            description: 'Support file type: image, video, audio, document, etc.',
+          }"
+          :disabled="disabled"
+          @change="(info) => items = info.fileList"
+        />
+      </Flex>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { UploadOutlined } from '@ant-design/icons-vue'
+import { CloudUploadOutlined, LinkOutlined } from '@ant-design/icons-vue';
+import { message, Button, Flex, Switch, Result, theme, Typography, Segmented, type UploadFile } from 'ant-design-vue';
+import { Attachments, Sender, type AttachmentsProps } from 'ant-design-x-vue';
+import { computed, h, ref, type CSSProperties } from 'vue';
 
-const fileList = ref([])
-const actionLogs = ref<Array<{time: string, action: string, fileName: string}>>([])
 
-const basicAttachments = ref([
+const fullScreenDrop = ref(false);
+const customContent = ref(true);
+const divRef = ref<HTMLDivElement>();
+const [messageApi, contextHolder] = message.useMessage();
+const handleChange = ({ file }: { file: UploadFile }) => {
+  messageApi.info(`Mock upload: ${file.name}`);
+};
+
+const getDropContainer = () => (fullScreenDrop.value ? document.body : divRef.value);
+
+const attachmentsNode = computed(() => h(Attachments, {
+  beforeUpload: () => false,
+  onChange: handleChange,
+  placeholder: {
+    icon: h(CloudUploadOutlined),
+    title: 'Drag & Drop files here',
+    description: 'Support file type: image, video, audio, document, etc.',
+  },
+  children: customContent.value && h(Button, { type: 'text', icon: h(LinkOutlined) }),
+  getDropContainer,
+}));
+
+
+
+const presetFiles: AttachmentsProps['items'] = [
   {
-    id: '1',
-    name: 'project-proposal.pdf',
-    size: '2.5MB',
-    type: 'pdf',
-    url: '#'
+    uid: '1',
+    name: 'uploading file.xlsx',
+    status: 'uploading',
+    url: 'http://www.baidu.com/xxx.png',
+    percent: 93,
   },
   {
-    id: '2',
-    name: 'meeting-notes.docx',
-    size: '1.2MB',
-    type: 'docx',
-    url: '#'
+    uid: '2',
+    name: 'uploaded file.docx',
+    status: 'done',
+    size: 123456,
+    description: 'Customize description',
+    url: 'http://www.baidu.com/yyy.png',
   },
   {
-    id: '3',
-    name: 'budget-analysis.xlsx',
-    size: '856KB',
-    type: 'xlsx',
-    url: '#'
-  }
-])
-
-const imageAttachments = ref([
-  {
-    id: '4',
-    name: 'screenshot-1.png',
-    size: '445KB',
-    type: 'image',
-    url: 'https://via.placeholder.com/300x200/1890ff/ffffff?text=Screenshot+1',
-    thumbnail: 'https://via.placeholder.com/100x100/1890ff/ffffff?text=Thumb+1'
+    uid: '3',
+    name: 'upload error with long text file name.zip',
+    status: 'error',
+    response: 'Server Error 500', // custom error message to show
+    url: 'http://www.baidu.com/zzz.png',
   },
   {
-    id: '5',
-    name: 'design-mockup.jpg',
-    size: '1.8MB',
-    type: 'image',
-    url: 'https://via.placeholder.com/300x200/52c41a/ffffff?text=Design+Mockup',
-    thumbnail: 'https://via.placeholder.com/100x100/52c41a/ffffff?text=Thumb+2'
-  }
-])
-
-const documentAttachments = ref([
-  {
-    id: '6',
-    name: 'api-documentation.md',
-    size: '125KB',
-    type: 'markdown',
-    url: '#'
+    uid: '4',
+    name: 'image uploading preview.png',
+    status: 'uploading',
+    percent: 33,
+    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
   },
   {
-    id: '7',
-    name: 'database-schema.sql',
-    size: '89KB',
-    type: 'sql',
-    url: '#'
+    uid: '5',
+    name: 'image done preview.png',
+    status: 'done',
+    size: 123456,
+    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
   },
   {
-    id: '8',
-    name: 'config.json',
-    size: '12KB',
-    type: 'json',
-    url: '#'
+    uid: '6',
+    name: 'image error preview.png',
+    status: 'error',
+    response: 'Server Error 500', // custom error message to show
+    thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+    url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+  },
+];
+
+const { token } = theme.useToken();
+const items1 = ref<AttachmentsProps['items']>([]);
+
+const sharedBorderStyle = computed<CSSProperties>(() => ({
+  borderRadius: token.value.borderRadius,
+  overflow: 'hidden',
+  background: token.value.colorBgContainer,
+}));
+
+const sharedAttachmentProps = computed<AttachmentsProps>(() => ({
+  beforeUpload: () => false,
+  items: items1.value,
+  onChange: ({ fileList }) => {
+    console.log('onChange:', fileList);
+    items.value = fileList;
+  },
+}));
+
+const fillFiles = () => {
+  items1.value = presetFiles;
+};
+
+const resetFiles = () => {
+  items1.value = [];
+};
+
+
+
+const presetFiles1: AttachmentsProps['items'] = Array.from({ length: 30 }).map((_, index) => ({
+  uid: String(index),
+  name: `file-${index}.jpg`,
+  status: 'done',
+  thumbUrl: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+  url: 'https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png',
+}));
+
+const overflow = ref<AttachmentsProps['overflow']>('wrap');
+const items = ref<AttachmentsProps['items']>(presetFiles1);
+const disabled = ref(false);
+
+// 使用计算属性来处理 items.length !== 0
+const hasItems = computed({
+  get: () => items.value.length !== 0,
+  set: (value) => {
+    items.value = value ? presetFiles1 : [];
   }
-])
-
-const uploadedAttachments = ref([])
-
-const addLog = (action: string, fileName: string) => {
-  actionLogs.value.unshift({
-    time: new Date().toLocaleTimeString(),
-    action,
-    fileName
-  })
-}
-
-const handleRemove = (item: any) => {
-  console.log('删除附件:', item)
-  addLog('删除', item.name)
-  
-  // 从对应的数组中移除
-  const arrays = [basicAttachments, imageAttachments, documentAttachments]
-  arrays.forEach(arr => {
-    const index = arr.value.findIndex(att => att.id === item.id)
-    if (index > -1) {
-      arr.value.splice(index, 1)
-    }
-  })
-}
-
-const handleDownload = (item: any) => {
-  console.log('下载附件:', item)
-  addLog('下载', item.name)
-  // 模拟下载
-  alert(`开始下载: ${item.name}`)
-}
-
-const handlePreview = (item: any) => {
-  console.log('预览附件:', item)
-  addLog('预览', item.name)
-  // 模拟预览
-  window.open(item.url, '_blank')
-}
-
-const beforeUpload = (file: any) => {
-  console.log('准备上传文件:', file)
-  
-  // 模拟上传成功，添加到已上传列表
-  const newAttachment = {
-    id: Date.now().toString(),
-    name: file.name,
-    size: formatFileSize(file.size),
-    type: getFileType(file.name),
-    url: '#'
-  }
-  
-  uploadedAttachments.value.push(newAttachment)
-  addLog('上传', file.name)
-  
-  // 阻止默认上传行为
-  return false
-}
-
-const handleFileRemove = (file: any) => {
-  console.log('移除文件:', file)
-  return true
-}
-
-const handleUploadedRemove = (item: any) => {
-  console.log('删除已上传附件:', item)
-  const index = uploadedAttachments.value.findIndex(att => att.id === item.id)
-  if (index > -1) {
-    uploadedAttachments.value.splice(index, 1)
-    addLog('删除', item.name)
-  }
-}
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 B'
-  const k = 1024
-  const sizes = ['B', 'KB', 'MB', 'GB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]
-}
-
-const getFileType = (fileName: string): string => {
-  const ext = fileName.split('.').pop()?.toLowerCase()
-  const typeMap: Record<string, string> = {
-    'pdf': 'pdf',
-    'doc': 'docx',
-    'docx': 'docx',
-    'xls': 'xlsx',
-    'xlsx': 'xlsx',
-    'png': 'image',
-    'jpg': 'image',
-    'jpeg': 'image',
-    'gif': 'image',
-    'md': 'markdown',
-    'sql': 'sql',
-    'json': 'json'
-  }
-  return typeMap[ext || ''] || 'file'
-}
+});
 </script>
 
 <style scoped>
@@ -250,61 +296,5 @@ const getFileType = (fileName: string): string => {
   padding: 24px;
   max-width: 800px;
   margin: 0 auto;
-}
-
-.demo-section {
-  margin-bottom: 32px;
-  padding: 16px;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-}
-
-.demo-section h2 {
-  margin-top: 0;
-  margin-bottom: 16px;
-  color: #1890ff;
-}
-
-.action-log {
-  max-height: 200px;
-  overflow-y: auto;
-  border: 1px solid #d9d9d9;
-  border-radius: 6px;
-  padding: 12px;
-  background: #fafafa;
-}
-
-.log-item {
-  display: flex;
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 12px;
-}
-
-.log-item:last-child {
-  border-bottom: none;
-}
-
-.log-time {
-  color: #999;
-  margin-right: 12px;
-  min-width: 80px;
-}
-
-.log-action {
-  color: #1890ff;
-  margin-right: 12px;
-  min-width: 40px;
-}
-
-.log-file {
-  color: #333;
-  flex: 1;
-}
-
-.empty-log {
-  text-align: center;
-  color: #999;
-  font-style: italic;
 }
 </style>
