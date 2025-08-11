@@ -1,164 +1,376 @@
 <template>
+  <h1>Sender 用于聊天的输入框组件。</h1>
   <div class="sender-demo">
-    <h1>Sender 消息发送组件示例</h1>
-    
-    <div class="demo-section">
-      <h2>基础发送器</h2>
-      <x-sender
-        v-model:value="message1"
-        placeholder="请输入消息..."
-        @submit="handleSubmit1"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>带附件的发送器</h2>
-      <x-sender
-        v-model:value="message2"
-        placeholder="支持文件上传..."
-        :actions="senderActions"
-        @submit="handleSubmit2"
-        @action-click="handleActionClick"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>多行输入发送器</h2>
-      <x-sender
-        v-model:value="message3"
-        placeholder="支持多行输入，Shift+Enter换行，Enter发送"
-        :autoSize="{ minRows: 3, maxRows: 6 }"
-        @submit="handleSubmit3"
-      />
-    </div>
-
-    <div class="demo-section">
-      <h2>自定义样式发送器</h2>
-      <x-sender
-        v-model:value="message4"
-        placeholder="自定义样式的发送器"
+    <contextHolder />
+    <Flex
+      vertical
+      gap="middle"
+    >
+      <Sender
+        v-model:value="value"
         :loading="loading"
-        :disabled="disabled"
-        @submit="handleSubmit4"
+        :auto-size="{ minRows: 2, maxRows: 6 }"
+        @submit="() => {
+          value = '';
+          loading = true
+          messageApi.info('Send message!');
+        }"
+        @cancel="() => {
+          loading = false
+          messageApi.error('Cancel sending!');
+        }"
       />
-      <div style="margin-top: 12px;">
-        <a-button @click="toggleLoading" style="margin-right: 8px;">
-          {{ loading ? '停止加载' : '开始加载' }}
-        </a-button>
-        <a-button @click="toggleDisabled">
-          {{ disabled ? '启用' : '禁用' }}
-        </a-button>
-      </div>
-    </div>
+      <Sender
+        value="Force as loading"
+        loading
+        read-only
+      />
+      <Sender
+        disabled
+        value="Set to disabled"
+      />
+    </Flex>
+    <hr>
+    <span>提交用法</span>
+    <context-holder />
+    <Sender
+      submit-type="shiftEnter"
+      placeholder="Press Shift + Enter to send message"
+      :on-submit="submit"
+    />
+    <hr />
+    <span>语音输入</span>
+    <context-holder />
+    <Sender
+      :allow-speech="true"
+      :on-submit="submit"
+    />
+    <context-holder />
+    <Sender
+      :allow-speech="{
+        audioIcon: h(SoundOutlined),
+        audioDisabledIcon: h(SoundOutlined, { style: { color: 'gray' } }),
+        audioRecordingIcon: h(EllipsisOutlined)
+      }"
+      :on-submit="submit"
+    />
+    <context-holder />
+    <Sender
+      :allow-speech="speechConfig"
+      :on-submit="submit"
+    />
+    <hr />
+    <span>自定义按钮</span>
+    <context-holder />
+    <Sender
+      v-model:value1="value1"
+      submit-type="shiftEnter"
+      :loading="loading1"
+      @change="(v) => {
+        console.log('Sender onChange', v)
+      }"
+      @submit="() => {
+        loading = true;
+      }"
+      @cancel="() => {
+        loading = false;
+      }"
+    >
+      <template #actions="{ info: { components: { SendButton, LoadingButton, ClearButton, SpeechButton } } }">
+        <Space size="small">
+          <Typography.Text type="secondary">
+            <small>`Shift + Enter` to submit</small>
+          </Typography.Text>
+          <component :is="ClearButton" />
+          <component :is="SpeechButton" />
+          <component
+            :is="LoadingButton"
+            v-if="loading1"
+            type="default"
+            style="display: block;"
+            :disabled="true"
+          >
+            <template #icon>
+              <Spin size="small" />
+            </template>
+          </component>
+          <component
+            :is="SendButton"
+            v-else
+            type="primary"
+            :disabled="false"
+          />
+        </Space>
+      </template>
+    </Sender>  
+    <hr />
+    <span>展开面板</span>
+    <context-holder />
+    <Flex
+      style="height: 350px;"
+      align="end"
+    >
+      <Sender
+        placeholder="← Click to open123456789"
+        @submit="senderSubmit"
+      >
+        <template #header>
+          <Sender.Header
+            title="Upload Sample"
+            :open="open"
+            @open-change="openChange"
+          >
+            <Flex
+              vertical
+              align="center"
+              gap="small"
+              :style="{ marginBlock: token.paddingLG }"
+            >
+              <CloudUploadOutlined style="font-size: 4em" />
+              <Typography.Title
+                :level="5"
+                style="margin: 0"
+              >
+                Drag file here(just demo)
+              </Typography.Title>
+              <Typography.Text type="secondary">
+                Support pdf, doc, xlsx, ppt, txt, image file types
+              </Typography.Text>
+              <Button @click="selectFileClick">
+                Select File
+              </Button>
+            </Flex>
+          </Sender.Header>
+        </template>
 
-    <div class="demo-section">
-      <h2>发送历史</h2>
-      <div class="message-history">
-        <div 
-          v-for="(msg, index) in messageHistory" 
-          :key="index"
-          class="history-item"
-        >
-          <strong>{{ msg.timestamp }}:</strong> {{ msg.content }}
-        </div>
-        <div v-if="messageHistory.length === 0" class="empty-history">
-          暂无消息记录
-        </div>
-      </div>
-    </div>
+        <template #prefix>
+          <Button
+            type="text"
+            @click="triggerOpen"
+          >
+            <template #icon>
+              <LinkOutlined />
+            </template>
+          </Button>
+        </template>
+      </Sender>
+    </Flex>
+
+    <hr />
+    <span>引用</span>
+    <context-holder />
+    <Flex
+      vertical
+      gap="middle"
+      align="flex-start"
+    >
+      <Switch
+        :checked="hasRef"
+        un-checked-children="With Reference"
+        checked-children="With Reference"
+        @change="toggleChecked"
+      />
+      <Sender
+        :on-submit="() => {
+          messageApi.success('Send message successfully!');
+        }"
+      >
+        <template #header>
+          <Sender.Header
+            :open="hasRef"
+            :title="headerTitle"
+            :on-open-change="openChange1"
+          />
+        </template>
+      </Sender>
+    </Flex>
+    <hr />
+    <span>自定义底部内容 - TSX 语法</span>
+    <SenderTsx />
+
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { message, Switch, Flex, Space, Spin, Typography, Button, Divider, theme } from 'ant-design-vue';
+import { Sender, type SenderProps } from 'ant-design-x-vue';
+import { onWatcherCleanup, ref, watch, h, computed } from 'vue';
+import { ApiOutlined, SearchOutlined, SoundOutlined, EllipsisOutlined, CloudUploadOutlined, LinkOutlined, EnterOutlined } from '@ant-design/icons-vue';
+import SenderTsx from './SenderTsx.vue';
 
-const message1 = ref('')
-const message2 = ref('')
-const message3 = ref('')
-const message4 = ref('')
-const loading = ref(false)
-const disabled = ref(false)
-const messageHistory = ref<Array<{content: string, timestamp: string}>>([])
+const [messageApi, contextHolder] = message.useMessage();
 
-const senderActions = [
-  {
-    key: 'attachment',
-    icon: '📎',
-    tooltip: '添加附件'
-  },
-  {
-    key: 'emoji',
-    icon: '😊',
-    tooltip: '添加表情'
-  },
-  {
-    key: 'voice',
-    icon: '🎤',
-    tooltip: '语音输入'
-  }
-]
+const value = ref('Hello? this is X!');
+const loading = ref<boolean>(false);
 
-const addToHistory = (content: string) => {
-  if (content.trim()) {
-    messageHistory.value.unshift({
-      content,
-      timestamp: new Date().toLocaleTimeString()
+// Mock send message
+watch(loading, () => {
+  if (loading.value) {
+    const timer = setTimeout(() => {
+      loading.value = false;
+      messageApi.success('Send message successfully!');
+    }, 3000);
+    onWatcherCleanup(() => {
+      clearTimeout(timer);
     })
   }
+});
+
+
+const submit = () => {
+  messageApi.success('Send message successfully!'); 
 }
 
-const handleSubmit1 = (value: string) => {
-  console.log('基础发送器提交:', value)
-  addToHistory(`[基础] ${value}`)
-  message1.value = ''
-}
+type SpeechConfig = SenderProps['allowSpeech'];
+const recording = ref(false);
 
-const handleSubmit2 = (value: string) => {
-  console.log('附件发送器提交:', value)
-  addToHistory(`[附件] ${value}`)
-  message2.value = ''
-}
-
-const handleSubmit3 = (value: string) => {
-  console.log('多行发送器提交:', value)
-  addToHistory(`[多行] ${value}`)
-  message3.value = ''
-}
-
-const handleSubmit4 = (value: string) => {
-  console.log('自定义发送器提交:', value)
-  addToHistory(`[自定义] ${value}`)
-  message4.value = ''
-}
-
-const handleActionClick = (action: any) => {
-  console.log('点击了操作按钮:', action)
-  switch (action.key) {
-    case 'attachment':
-      alert('打开文件选择器')
-      break
-    case 'emoji':
-      alert('打开表情面板')
-      break
-    case 'voice':
-      alert('开始语音输入')
-      break
+const speechConfig = computed<SpeechConfig>(
+  () => ({
+    // When setting `recording`, the built-in speech recognition feature will be disabled
+    recording: recording.value,
+    onRecordingChange: (nextRecording) => {
+      messageApi.info(`Mock Customize Recording: ${nextRecording}`);
+      recording.value = nextRecording;
+    },
   }
+))
+
+
+// const [message, contextHolder] = message.useMessage();
+const value1 = ref('');
+const loading1 = ref<boolean>(false);
+// Mock send message
+watch(loading1, () => {
+  if (loading1.value) {
+    const timer = setTimeout(() => {
+      loading1.value = false;
+      value1.value = '';
+      message.success('Send message successfully!');
+    }, 2000);
+
+    onWatcherCleanup(() => {
+      clearTimeout(timer);
+    });
+  }
+});
+
+const open = ref(false);
+const { token } = theme.useToken();
+const openChange = (v: boolean) => {
+  open.value = v;
 }
 
-const toggleLoading = () => {
-  loading.value = !loading.value
+const triggerOpen = () => {
+  open.value = !open.value;
 }
 
-const toggleDisabled = () => {
-  disabled.value = !disabled.value
+const senderSubmit = () => {
+  message.success('Send message successfully!');
 }
+
+const selectFileClick = () => {
+  message.info('Mock select file');
+}
+
+const hasRef = ref(true);
+
+
+const toggleChecked = () => {
+  hasRef.value =!hasRef.value;
+}
+
+const openChange1 = (v: boolean) => {
+  hasRef.value = v;
+}
+
+const headerTitle = h(Space, {}, () => [
+  h(EnterOutlined),
+  h(Typography.Text, { type: 'secondary' }, () => '"Tell more about Ant Design X"')
+])
+
+const iconStyle = {
+  fontSize: 18,
+  color: token.value.colorText,
+}
+
+// Template 语法演示相关状态
+const templateValue = ref('Template syntax example');
+const templateLoading = ref<boolean>(false);
+
+// Template 语法演示方法
+const handleTemplateSubmit = () => {
+  templateLoading.value = true;
+};
+
+const handleTemplateCancel = () => {
+  templateLoading.value = false;
+};
+
+// Mock send message for template
+watch(templateLoading, () => {
+  if (templateLoading.value) {
+    const timer = setTimeout(() => {
+      templateLoading.value = false;
+      messageApi.success('Template message sent successfully!');
+    }, 2000);
+    onWatcherCleanup(() => {
+      clearTimeout(timer);
+    })
+  }
+});
+
+// defineRender(() => {
+//   return (
+//     <Sender
+//       value={value.value}
+//       onChange={(v) => {
+//         value.value = v;
+//       }}
+//       // autoSize={{ minRows: 2, maxRows: 6 }}
+//       placeholder="Press Enter to send message"
+//       footer={({ components }) => {
+//         const { SendButton, LoadingButton, SpeechButton } = components;
+//         return (
+//           <Flex justify="space-between" align="center">
+//             <Flex gap="small" align="center">
+//               <Button style={iconStyle} type="text" icon={<LinkOutlined />} />
+//               <Divider type="vertical" />
+//               Deep Thinking
+//               <Switch size="small" />
+//               <Divider type="vertical" />
+//               <Button icon={<SearchOutlined />}>Global Search</Button>
+//             </Flex>
+//             <Flex align="center">
+//               <Button type="text" style={iconStyle} icon={<ApiOutlined />} />
+//               <Divider type="vertical" />
+//               <SpeechButton style={iconStyle} />
+//               <Divider type="vertical" />
+//               {loading.value ? (
+//                 <LoadingButton type="default" />
+//               ) : (
+//                 <SendButton type="primary" disabled={false} />
+//               )}
+//             </Flex>
+//           </Flex>
+//         );
+//       }}
+//       onSubmit={() => {
+//         loading.value = true;
+//       }}
+//       onCancel={() => {
+//         loading.value = false;
+//       }}
+//       actions={false}
+//     />
+//   );
+// })
+
 </script>
 
 <style scoped>
 .sender-demo {
   padding: 24px;
-  max-width: 800px;
+  max-width: 1000px;
   margin: 0 auto;
 }
 
@@ -173,6 +385,51 @@ const toggleDisabled = () => {
   margin-top: 0;
   margin-bottom: 16px;
   color: #1890ff;
+}
+
+.template-demo {
+  padding: 20px;
+  border: 2px solid #52c41a;
+  border-radius: 8px;
+  background: #f6ffed;
+  margin-bottom: 24px;
+}
+
+.template-demo h2 {
+  color: #52c41a;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.syntax-info {
+  margin-top: 20px;
+  padding: 16px;
+  background: #f6f8fa;
+  border-radius: 8px;
+}
+
+.syntax-info h3 {
+  color: #333;
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+
+.syntax-info ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.syntax-info li {
+  margin-bottom: 8px;
+  color: #666;
+}
+
+.syntax-info code {
+  background: #f1f3f4;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  color: #d73a49;
 }
 
 .message-history {
@@ -197,5 +454,20 @@ const toggleDisabled = () => {
   text-align: center;
   color: #999;
   font-style: italic;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .sender-demo {
+    padding: 16px;
+  }
+  
+  .template-demo {
+    padding: 16px;
+  }
+  
+  .demo-section {
+    padding: 12px;
+  }
 }
 </style>
