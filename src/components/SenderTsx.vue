@@ -112,6 +112,8 @@ defineRender(() => {
             actions={false}
         />
 
+        <p>自定义输入框</p>
+
         <Sender
            value={value.value}
            onChange={(v) => {
