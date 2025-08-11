@@ -16,7 +16,13 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Sender: typeof import('./src/components/Sender.vue')['default']
+    Suggestion: typeof import('./src/components/Suggestion.vue')['default']
     ThoughtChain: typeof import('./src/components/ThoughtChain.vue')['default']
+    UseXAgent: typeof import('./src/components/UseXAgent.vue')['default']
+    UseXChat: typeof import('./src/components/UseXChat.vue')['default']
     Welcome: typeof import('./src/components/Welcome.vue')['default']
+    XProvider: typeof import('./src/components/XProvider.vue')['default']
+    XRequest: typeof import('./src/components/XRequest.vue')['default']
+    XStream: typeof import('./src/components/XStream.vue')['default']
   }
 }

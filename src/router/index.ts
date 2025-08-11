@@ -68,6 +68,54 @@ const routes: RouteRecordRaw[] = [
         }
     },
     {
+        path: '/suggestion',
+        name: 'Suggestion',
+        component: () => import('../components/Suggestion.vue'),
+        meta: {
+            title: '快捷指令'
+        }
+    },
+    {
+        path: '/use-x-agent',
+        name: 'UseXAgent',
+        component: () => import('../components/UseXAgent.vue'),
+        meta: {
+            title: '模型调度'
+        }
+    },
+    {
+        path: '/use-x-chat',
+        name: 'UseXChat',
+        component: () => import('../components/UseXChat.vue'),
+        meta: {
+            title: '数据管理'
+        }
+    },
+    {
+        path: '/x-stream',
+        name: 'XStream',
+        component: () => import('../components/XStream.vue'),
+        meta: {
+            title: '流'
+        }
+    },
+    {
+        path: '/x-request',
+        name: 'XRequest',
+        component: () => import('../components/XRequest.vue'),
+        meta: {
+            title: '请求'
+        }
+    },
+    {
+        path: '/x-provider',
+        name: 'XProvider',
+        component: () => import('../components/XProvider.vue'),
+        meta: {
+            title: '全局化配置'
+        }
+    },
+    {
         path: '/about',
         name: 'About',
         component: () => import('../views/About.vue'),
