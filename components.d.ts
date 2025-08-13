@@ -10,6 +10,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     Attachments: typeof import('./src/components/Attachments.vue')['default']
     AXBubble: typeof import('ant-design-x-vue')['Bubble']
+    AXSender: typeof import('ant-design-x-vue')['Sender']
+    AXSuggestion: typeof import('ant-design-x-vue')['Suggestion']
     Bubble: typeof import('./src/components/Bubble.vue')['default']
     Conversations: typeof import('./src/components/Conversations.vue')['default']
     Prompts: typeof import('./src/components/Prompts.vue')['default']
