@@ -7,7 +7,7 @@ import { AntDesignXVueResolver } from 'ant-design-x-vue/resolver';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/bubble-basic/',
+  base: './',
   plugins: [
     VueMacros({
       plugins: {
