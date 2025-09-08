@@ -26,7 +26,7 @@ async function deploy() {
     if (buildStderr) console.error(buildStderr);
     
     console.log('Deploying to GitHub Pages...');
-    const { stdout: deployStdout, stderr: deployStderr } = await execPromise('npm run deploy');
+    const { stdout: deployStdout, stderr: deployStderr } = await execPromise('npx gh-pages -d dist');
     console.log(deployStdout);
     if (deployStderr) console.error(deployStderr);
     
